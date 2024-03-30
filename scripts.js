@@ -1,70 +1,131 @@
-//My importing functions
-import { authors, books,  genres, BOOKS_PER_PAGE} from "./data.js";
+//imports data.js
+import { authors, books, genres, BOOKS_PER_PAGE } from "./data.js";
 
 /**
  * global variables
  */
-const fragment = document.createDocumentFragment()
-const extracted = books.slice(0, BOOKS_PER_PAGE)
+let booksPerPage = BOOKS_PER_PAGE
+const genreLocal=genres
+const fragment = document.createDocumentFragment();
+const extracted = books.slice(0, booksPerPage);
 
 /**
  * a list of query selectors from index.html
  */
-const HTML= {
-    list:{
-        items: document.querySelector('[data-list-items]'),
-        message: document.querySelector('[data-list-message]'),
-        button: document.querySelector('[data-list-button]')
-    },
+const HTML = {
+     header:{
+    search: document.querySelector("[data-header-search]"),
+    settings: document.querySelector("[data-header-settings]"),   
+  },
+    list: {
+    items: document.querySelector("[data-list-items]"),
+    message: document.querySelector("[data-list-message]"),
+    button: document.querySelector("[data-list-button]"),
+  },
 
-    activeList:{
-        preview : document.querySelector('[data-list-blur]'),
-        content : document.querySelector('.overlay_content'),
-        title : document.querySelector('[data-list-title]'),
-        subtitle : document.querySelector('[data-list-subtitle]'),
-        description : document.querySelector('[data-list-description]'),
-    }
+  activeList: {
+    preview: document.querySelector("[data-list-blur]"),
+    content: document.querySelector(".overlay_content"),
+    title: document.querySelector("[data-list-title]"),
+    subtitle: document.querySelector("[data-list-subtitle]"),
+    description: document.querySelector("[data-list-description]"),
+    button: document.querySelector("[data-list-close]"),
+  },
 
-}
+  search:{
+    overlay: document.querySelector("[data-search-overlay]"),
+    title: document.querySelector("[data-search-title]"),
+    genre: document.querySelector("[data-search-genres]"),
+    author: document.querySelector("[data-search-authors]"),
+  }
+};
 
+HTML.list.button.textContent=`Show More (${ books.length-booksPerPage})`
+console.log(HTML.list.button)
 /**
  * this takes an object called book and creates element with the html for a single
  * book.
- * @param {object} book 
+ * @param {object} book
  * @returns element
  */
-const createPreview=(book)=>{
-    const {title, image, author, id} = book
-    const element = document.createElement('div')
-    const refAuthor = authors[author]
-    element.dataset.id = id
-
-    element.innerHTML=`
-    <div class="preview">
+const createPreview = (book) => {
+  const { title, image, author, id } = book;
+  const element = document.createElement("div");
+  const refAuthor = authors[author];
+  element.dataset.id = id;
+    element.className ="preview"
+  element.innerHTML = `
+    
     <img src= ${image} class ="preview__image"alt="${title}'s bookcover">
-              <dl class="list__items">
+              <div class="list__items">
                  
-                 <dt class='preview__title'>${title}</dt>
-                 <dd class="preview__author">${refAuthor}</dd> 
+                 <div class='preview__title'>${title}</div>
+                 <div class="preview__author">${refAuthor}</div> 
                  
-                 </dl>
                  </div>
-    `
-    return element
+                 
+    `;
+  return element;
+};
+/**
+ * this factory function takes a selector from the html as an element
+ * and a object to populate that selector
+ * @param {Element} element 
+ * @param {Object} object 
+ */
+const SelectPopulator =(element ,object)=>{
+  for (const item in object) {
+    const name =object[item];
+    const option = document.createElement("option");
+    option.value = item;
+    option.textContent = name;
+    element.appendChild(option)
+   
+  }
 }
-
+SelectPopulator(HTML.search.genre, genres)
+SelectPopulator(HTML.search.author, authors)
 
 /**
  * this loop goes through all of the books that have been extracted and  uses
  * the factory function create preview to pin them to the book.
  */
-for(const book of extracted){
-    fragment.append(createPreview(book))   
-}
+const addFragment = (extract) => {
+  for (const book of extract) {
+    fragment.append(createPreview(book));
+  }
+  HTML.list.items.appendChild(fragment);
+ 
+};
 
-HTML.list.items.appendChild(fragment)
+addFragment(extracted);
 
-
+/**
+ *
+ * this function increases the books per page by 36
+ *
+ */
+const previewMore = (event) => {
+   const extract = books.slice(booksPerPage, booksPerPage + 36)
+    booksPerPage = booksPerPage + 36
+    addFragment(extract)
+    HTML.list.button.textContent=`Show More (${ books.length - booksPerPage })`
+};
+/**
+ * 
+ *  This event toggles the search overlay
+ * 
+ */
+const searchOverlay = (event) =>{
+   if (!HTML.search.overlay.open === true) {
+    HTML.search.overlay.open = true;
+   } else {
+   HTML.search.overlay.open = false;
+   
+   HTML.search.genre.addFragment(createGenreOptionsHtml())
+   
+   }
+ }
 //     return element
 // }
 /* matches = books
@@ -73,36 +134,17 @@ page = 1;
 if (!books && !Array.isArray(books)) throw new Error('Source required') 
 if (!range && range.length < 2) throw new Error('Range must be an array with two numbers') */
 
-const cssColors ={
-    day : {
-    dark: '10, 10, 20',
-    light: '255, 255, 255',
-    },
+const cssColors = {
+  day: {
+    dark: "10, 10, 20",
+    light: "255, 255, 255",
+  },
 
-    night : {
-    dark: '255, 255, 255',
-    light: '10, 10, 20',
-    }
-}
-
-
-// fragment = document.createDocumentFragment()
-
-//  extracted = books.slice(0, 36)
-
-// for ({ author, image, title, id }; extracted.length; i++) {
-//     const preview = createPreview({
-//         author,
-//         id,
-//         image,
-//         title
-//     })
-
-//     fragment.appendChild(preview)
-// }
-
-// data-list-items.appendChild(fragment)
-
+  night: {
+    dark: "255, 255, 255",
+    light: "10, 10, 20",
+  },
+};
 
 // genres = document.createDocumentFragment()
 // element = document.createElement('option')
@@ -182,10 +224,9 @@ const cssColors ={
 //         if titleMatch && authorMatch && genreMatch => result.push(book)
 //     }
 
-//     if display.length < 1 
+//     if display.length < 1
 //     data-list-message.class.add('list__message_show')
 //     else data-list-message.class.remove('list__message_show')
-    
 
 //     data-list-items.innerHTML = ''
 //     const fragment = document.createDocumentFragment()
@@ -203,7 +244,7 @@ const cssColors ={
 //                 class="preview__image"
 //                 src="${image}"
 //             />
-            
+
 //             <div class="preview__info">
 //                 <h3 class="preview__title">${title}</h3>
 //                 <div class="preview__author">${authors[authorId]}</div>
@@ -212,7 +253,7 @@ const cssColors ={
 
 //         fragment.appendChild(element)
 //     }
-    
+
 //     data-list-items.appendChild(fragments)
 //     initial === matches.length - [page * BOOKS_PER_PAGE]
 //     remaining === hasRemaining ? initial : 0
@@ -243,17 +284,24 @@ const cssColors ={
 //     for (node; pathArray; i++) {
 //         if active break;
 //         const previewId = node?.dataset?.preview
-    
+
 //         for (const singleBook of books) {
 //             if (singleBook.id === id) active = singleBook
-//         } 
+//         }
 //     }
-    
+
 //     if !active return
 //     data-list-active.open === true
 //     data-list-blur + data-list-image === active.image
 //     data-list-title === active.title
-    
+
 //     data-list-subtitle === '${authors[active.author]} (${Date(active.published).year})'
 //     data-list-description === active.description
 // }
+
+/**
+ * Event listeners
+ */
+
+HTML.list.button.addEventListener("click", previewMore);
+HTML.header.search.addEventListener("click", searchOverlay)
