@@ -31,6 +31,7 @@ const HTML = {
   },
 
   activeList: {
+    overlay: document.querySelector("[data-list-active]"),
     preview: document.querySelector("[data-list-blur]"),
     content: document.querySelector(".overlay_content"),
     title: document.querySelector("[data-list-title]"),
@@ -46,6 +47,7 @@ const HTML = {
     author: document.querySelector("[data-search-authors]"),
     cancelButton: document.querySelector("[data-search-cancel]"),
   },
+
 };
 
 /**
@@ -225,6 +227,23 @@ page = 1;
 if (!range && range.length < 2) throw new Error('Range must be an array with two numbers')
 
  */
+const selectedBookToggle = (event)=>{
+  let { overlay, preview, content, title, subtitle, description, button } = HTML.activeList;
+  
+  const selectedBookElement = event.target.closest(".preview")
+    if (selectedBookElement) {
+        const bookId = selectedBookElement.dataset.id
+        const selectedBook = books.find(book => book.id === bookId);
+    if(selectedBook){
+      title.textContent = selectedBook.title
+      overlay.open = true;
+    }
+     
+    
+    console.log(selectedBook)
+  }
+  
+}
 
 const cssColors = {
   day: {
@@ -242,6 +261,8 @@ HTML.list.button.addEventListener("click", previewMore);
 HTML.header.search.addEventListener("click", searchOverlay);
 HTML.search.overlay.addEventListener("submit", filterSearch);
 HTML.search.cancelButton.addEventListener("click", searchOverlay);
+HTML.list.items.addEventListener('click', selectedBookToggle)
+
 
 // genres = document.createDocumentFragment()
 // element = document.createElement('option')
