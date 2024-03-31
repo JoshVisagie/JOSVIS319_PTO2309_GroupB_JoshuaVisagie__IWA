@@ -4,20 +4,24 @@ import { authors, books, genres, BOOKS_PER_PAGE } from "./data.js";
 /**
  * global variables
  */
-let booksPerPage = BOOKS_PER_PAGE
-const genreLocal=genres
+let booksPerPage = BOOKS_PER_PAGE;
+const genreLocal = genres;
 const fragment = document.createDocumentFragment();
-const extracted = books.slice(0, booksPerPage);
+let booksToDisplay=[]
+
+let titleFilter = null;
+let genreFilter = null;
+let authorFilter = null;
 
 /**
  * a list of query selectors from index.html
  */
 const HTML = {
-     header:{
+  header: {
     search: document.querySelector("[data-header-search]"),
-    settings: document.querySelector("[data-header-settings]"),   
+    settings: document.querySelector("[data-header-settings]"),
   },
-    list: {
+  list: {
     items: document.querySelector("[data-list-items]"),
     message: document.querySelector("[data-list-message]"),
     button: document.querySelector("[data-list-button]"),
@@ -32,16 +36,58 @@ const HTML = {
     button: document.querySelector("[data-list-close]"),
   },
 
-  search:{
+  search: {
     overlay: document.querySelector("[data-search-overlay]"),
     title: document.querySelector("[data-search-title]"),
     genre: document.querySelector("[data-search-genres]"),
     author: document.querySelector("[data-search-authors]"),
-  }
+    searchButton: document.querySelector("[data-search-button]"),
+  },
 };
 
-HTML.list.button.textContent=`Show More (${ books.length-booksPerPage})`
-console.log(HTML.list.button)
+/**
+ * this updates the list of books that will be displayed based on any filters that have been applied
+ * 
+ */
+const toDisplay = () => {
+   
+  booksToDisplay=[]
+
+  for (const singleBook of books) {
+    const hasMatchingGenre = singleBook.genres.some(
+      (genre) => genre === genreFilter
+    );
+
+    if (
+      (genreFilter === null || hasMatchingGenre) &&
+      (titleFilter === null ||
+        singleBook.title.toLowerCase().includes(titleFilter.toLowerCase())) &&
+      (authorFilter === null || singleBook.author === authorFilter)
+    ) {
+      booksToDisplay.push(singleBook);
+    }
+  }
+
+  console.log(booksToDisplay)
+};
+
+toDisplay()
+const extracted = booksToDisplay.slice(0, booksPerPage);
+//need to create an update button function
+HTML.list.button.textContent = `Show More (${booksToDisplay.length - booksPerPage})`;
+
+/**
+ *
+ * this function increases the books per page by 36
+ *
+ */
+const previewMore = (event) => {
+  const extract = booksToDisplay.slice(booksPerPage, booksPerPage + 36);
+  booksPerPage = booksPerPage + 36;
+  addFragment(extract);
+  HTML.list.button.textContent = `Show More (${booksToDisplay.length - booksPerPage})`;
+};
+
 /**
  * this takes an object called book and creates element with the html for a single
  * book.
@@ -53,7 +99,7 @@ const createPreview = (book) => {
   const element = document.createElement("div");
   const refAuthor = authors[author];
   element.dataset.id = id;
-    element.className ="preview"
+  element.className = "preview";
   element.innerHTML = `
     
     <img src= ${image} class ="preview__image"alt="${title}'s bookcover">
@@ -70,21 +116,20 @@ const createPreview = (book) => {
 /**
  * this factory function takes a selector from the html as an element
  * and a object to populate that selector
- * @param {Element} element 
- * @param {Object} object 
+ * @param {Element} element
+ * @param {Object} object
  */
-const SelectPopulator =(element ,object)=>{
+const SelectPopulator = (element, object) => {
   for (const item in object) {
-    const name =object[item];
+    const name = object[item];
     const option = document.createElement("option");
     option.value = item;
     option.textContent = name;
-    element.appendChild(option)
-   
+    element.appendChild(option);
   }
-}
-SelectPopulator(HTML.search.genre, genres)
-SelectPopulator(HTML.search.author, authors)
+};
+SelectPopulator(HTML.search.genre, genres);
+SelectPopulator(HTML.search.author, authors);
 
 /**
  * this loop goes through all of the books that have been extracted and  uses
@@ -95,37 +140,32 @@ const addFragment = (extract) => {
     fragment.append(createPreview(book));
   }
   HTML.list.items.appendChild(fragment);
- 
 };
 
 addFragment(extracted);
 
+
 /**
  *
- * this function increases the books per page by 36
- *
- */
-const previewMore = (event) => {
-   const extract = books.slice(booksPerPage, booksPerPage + 36)
-    booksPerPage = booksPerPage + 36
-    addFragment(extract)
-    HTML.list.button.textContent=`Show More (${ books.length - booksPerPage })`
-};
-/**
- * 
  *  This event toggles the search overlay
- * 
+ *
  */
-const searchOverlay = (event) =>{
-   if (!HTML.search.overlay.open === true) {
+const searchOverlay = (event) => {
+  if (!HTML.search.overlay.open === true) {
     HTML.search.overlay.open = true;
-   } else {
-   HTML.search.overlay.open = false;
-   
-   HTML.search.genre.addFragment(createGenreOptionsHtml())
-   
-   }
- }
+  } else {
+    HTML.search.overlay.open = false;
+
+    HTML.search.genre.addFragment(createGenreOptionsHtml());
+  }
+};
+
+const filterSearch = (event) => {
+  preventDefault();
+  const booksAsArray = Object.entries(books);
+  console.log(booksAsArray);
+};
+
 //     return element
 // }
 /* matches = books
@@ -304,4 +344,5 @@ const cssColors = {
  */
 
 HTML.list.button.addEventListener("click", previewMore);
-HTML.header.search.addEventListener("click", searchOverlay)
+HTML.header.search.addEventListener("click", searchOverlay);
+HTML.search.searchButton.addEventListener("click", filterSearch);
