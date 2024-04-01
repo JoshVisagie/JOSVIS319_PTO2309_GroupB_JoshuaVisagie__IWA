@@ -48,6 +48,12 @@ const HTML = {
     cancelButton: document.querySelector("[data-search-cancel]"),
   },
 
+  settings: {
+    overlay : document.querySelector("[data-settings-overlay]"),
+    theme : document.querySelector("[data-settings-theme]"),
+    cancelButton: document.querySelector("[data-settings-cancel]"),
+    submitButton : document.querySelector(".overlay__button_primary")
+  }
 };
 
 /**
@@ -65,7 +71,7 @@ const toDisplay = () => {
     if (
       (genreFilter === null || hasMatchingGenre) &&
       (titleFilter === null ||
-        singleBook.title.toLowerCase().includes(titleFilter.toLowerCase())) &&
+        singleBook.title.toLowerCase().includes(titleFilter.toLowerCase().trim())) &&
       (authorFilter === null || singleBook.author === authorFilter)
     ) {
       booksToDisplay.push(singleBook);
@@ -82,17 +88,19 @@ extracted = booksToDisplay.slice(0, booksPerPage);
  * a function to update the 'Show More:' button
  */
 const buttonUpdate = () => {
+  let{button}=HTML.list
+
   let buttonValue = booksToDisplay.length - booksPerPage;
-  HTML.list.button.className = "list__button";
+  button.className = "list__button";
 
   if (buttonValue <= 0) {
     buttonValue = 0;
-    HTML.list.button.disabled = true;
+    button.disabled = true;
   } else {
-    HTML.list.button.disabled = false;
+    button.disabled = false;
   }
 
-  HTML.list.button.innerHTML = `
+    button.innerHTML = `
         <span>Show More:</span>
       <span class="list__remaining">(${buttonValue})</span>
       `;
@@ -166,10 +174,13 @@ SelectPopulator(HTML.search.author, authors);
  * the factory function create preview to  in the items div
  */
 const addFragment = (extract) => {
+  
+  let {items}=HTML.list
+
   for (const book of extract) {
     fragment.append(createPreview(book));
   }
-  HTML.list.items.appendChild(fragment);
+  items.appendChild(fragment);
 };
 
 addFragment(extracted);
@@ -178,11 +189,13 @@ addFragment(extracted);
  *  This event toggles the search overlay when the search or cancel buttons
  */
 const searchOverlay = (event) => {
-  if (!HTML.search.overlay.open === true) {
-    HTML.search.overlay.open = true;
-    HTML.search.title.focus();
+  let{overlay, title }=HTML.search
+
+  if (!overlay.open === true) {
+    overlay.open = true;
+    title.focus();
   } else {
-    HTML.search.overlay.open = false;
+    overlay.open = false;
   }
 };
 
@@ -197,52 +210,83 @@ const searchOverlay = (event) => {
  * @param {event} event
  */
 const filterSearch = (event) => {
+  let {title, genre, author, overlay} = HTML.search
+  let {message} = HTML.list
+
   event.preventDefault();
   HTML.list.items.innerHTML = "";
 
-  titleFilter = HTML.search.title.value;
-  genreFilter = HTML.search.genre.value;
+  titleFilter = title.value;
+  genreFilter = genre.value;
   if (genreFilter === "null") genreFilter = null;
-  authorFilter = HTML.search.author.value;
+  authorFilter = author.value;
   if (authorFilter === "null") authorFilter = null;
 
-  HTML.search.overlay.open = false;
+  overlay.open = false;
   toDisplay();
   extracted = booksToDisplay.slice(0, booksPerPage);
   addFragment(extracted);
   buttonUpdate();
 
   if (booksToDisplay.length === 0) {
-    HTML.list.message.classList.add("list__message_show");
+    message.classList.add("list__message_show");
   } else {
-    HTML.list.message.classList.remove("list__message_show");
+    message.classList.remove("list__message_show");
   }
 };
 
-//     return element
-// }
-/* matches = books
-page = 1;
-(!books && !Array.isArray(books)) throw new Error('Source required') 
-if (!range && range.length < 2) throw new Error('Range must be an array with two numbers')
 
- */
 const selectedBookToggle = (event)=>{
-  let { overlay, preview, content, title, subtitle, description, button } = HTML.activeList;
+  let { overlay, preview , title, subtitle, description } = HTML.activeList;
   
   const selectedBookElement = event.target.closest(".preview")
     if (selectedBookElement) {
         const bookId = selectedBookElement.dataset.id
         const selectedBook = books.find(book => book.id === bookId);
     if(selectedBook){
-      title.textContent = selectedBook.title
+      title.textContent =`${ selectedBook.title} (${selectedBook.published.slice(0,4)})`
+      preview.src = selectedBook.image
+      subtitle.textContent = authors[selectedBook.author]
+      description.textContent = selectedBook.description
       overlay.open = true;
     }
      
     
     console.log(selectedBook)
   }
-  
+}
+/**
+ * this closes the overlay of book you have selected
+ * @param {event} event 
+ */
+const closeSelectedBook = (event) =>{
+  let {overlay} = HTML.activeList;
+  overlay.open=false;
+}
+/**
+ * this toggles the settings overlay open and closed when pushing the settings
+ * button on the header or the cancel button on the form
+ * @param {event} event 
+ */
+const settingsOverlay =(event)=>{
+  let{overlay, theme  }=HTML.settings
+ 
+  if (!overlay.open === true) {
+    overlay.open = true;
+    theme.focus();
+  } else {
+    overlay.open = false;
+  }
+};
+
+/**
+ * this functions changes the look color mode of the website when the submit
+ * form is submitted
+ * @param {event} event 
+ */
+const changeSettings =(event)=>{
+  event.preventDefault();
+  console.log('change settings')
 }
 
 const cssColors = {
@@ -262,117 +306,29 @@ HTML.header.search.addEventListener("click", searchOverlay);
 HTML.search.overlay.addEventListener("submit", filterSearch);
 HTML.search.cancelButton.addEventListener("click", searchOverlay);
 HTML.list.items.addEventListener('click', selectedBookToggle)
+HTML.activeList.button.addEventListener('click', closeSelectedBook)
+HTML.settings.overlay.addEventListener("submit", changeSettings);
+HTML.header.settings.addEventListener('click', settingsOverlay)
+HTML.settings.cancelButton.addEventListener('click', settingsOverlay)
 
 
-// genres = document.createDocumentFragment()
-// element = document.createElement('option')
-// element.value = 'any'
-// element = 'All Genres'
-// genres.appendChild(element)
 
-// for ([id, name]; Object.entries(genres); i++) {
-//     document.createElement('option')
-//     element.value = value
-//     element.innerText = text
-//     genres.appendChild(element)
+
+
+//     return element
 // }
+/* matches = books
+page = 1;
+(!books && !Array.isArray(books)) throw new Error('Source required') 
+if (!range && range.length < 2) throw new Error('Range must be an array with two numbers')
 
-// data-search-genres.appendChild(genres)
-
-// authors = document.createDocumentFragment()
-// element = document.createElement('option')
-// element.value = 'any'
-// element.innerText = 'All Authors'
-// authors.appendChild(element)
-
-// for ([id, name];Object.entries(authors); id++) {
-//     document.createElement('option')
-//     element.value = value
-//     element = text
-//     authors.appendChild(element)
-// }
-
-// data-search-authors.appendChild(authors)
+ */
 
 // data-settings-theme.value === window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'night' : 'day'
 // v = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches? 'night' | 'day'
 
 // documentElement.style.setProperty('--color-dark', css[v].dark);
 // documentElement.style.setProperty('--color-light', css[v].light);
-// data-list-button = "Show more (books.length - BOOKS_PER_PAGE)"
-
-// data-list-button.disabled = !(matches.length - [page * BOOKS_PER_PAGE] > 0)
-
-// data-list-button.innerHTML = /* html */ [
-//     '<span>Show more</span>',
-//     '<span class="list__remaining"> (${matches.length - [page * BOOKS_PER_PAGE] > 0 ? matches.length - [page * BOOKS_PER_PAGE] : 0})</span>',
-// ]
-
-// data-search-cancel.click() { data-search-overlay.open === false }
-// data-settings-cancel.click() { querySelect(data-settings-overlay).open === false }
-// data-settings-form.submit() { actions.settings.submit }
-// data-list-close.click() { data-list-active.open === false }
-
-// data-list-button.click() {
-//     document.querySelector([data-list-items]).appendChild(createPreviewsFragment(matches, page x BOOKS_PER_PAGE, {page + 1} x BOOKS_PER_PAGE]))
-//     actions.list.updateRemaining()
-//     page = page + 1
-// }
-
-// data-header-search.click() {
-//     data-search-overlay.open === true ;
-//     data-search-title.focus();
-// }
-
-// data-search-form.click(filters) {
-//     preventDefault()
-//     const formData = new FormData(event.target)
-//     const filters = Object.fromEntries(formData)
-//     result = []
-
-//     for (book; booksList; i++) {
-//         titleMatch = filters.title.trim() = '' && book.title.toLowerCase().includes[filters.title.toLowerCase()]
-//         authorMatch = filters.author = 'any' || book.author === filters.author
-
-//         {
-//             genreMatch = filters.genre = 'any'
-//             for (genre; book.genres; i++) { if singleGenre = filters.genre { genreMatch === true }}}
-//         }
-
-//         if titleMatch && authorMatch && genreMatch => result.push(book)
-//     }
-
-//     if display.length < 1
-//     data-list-message.class.add('list__message_show')
-//     else data-list-message.class.remove('list__message_show')
-
-//     data-list-items.innerHTML = ''
-//     const fragment = document.createDocumentFragment()
-//     const extracted = source.slice(range[0], range[1])
-
-//     for ({ author, image, title, id }; extracted.length; i++) {
-//         const { author: authorId, id, image, title } = props
-
-//         element = document.createElement('button')
-//         element.classList = 'preview'
-//         element.setAttribute('data-preview', id)
-
-//         element.innerHTML = /* html */ `
-//             <img
-//                 class="preview__image"
-//                 src="${image}"
-//             />
-
-//             <div class="preview__info">
-//                 <h3 class="preview__title">${title}</h3>
-//                 <div class="preview__author">${authors[authorId]}</div>
-//             </div>
-//         `
-
-//         fragment.appendChild(element)
-//     }
-
-//     `
 
 //     window.scrollTo({ top: 0, behavior: 'smooth' });
 //     data-search-overlay.open = false
@@ -387,21 +343,6 @@ HTML.list.items.addEventListener('click', selectedBookToggle)
 //     data-settings-overlay).open === false
 // }
 
-// data-list-items.click() {
-//     pathArray = Array.from(event.path || event.composedPath())
-//     active;
-
-//     for (node; pathArray; i++) {
-//         if active break;
-//         const previewId = node?.dataset?.preview
-
-//         for (const singleBook of books) {
-//             if (singleBook.id === id) active = singleBook
-//         }
-//     }
-
-//     if !active return
-//     data-list-active.open === true
 //     data-list-blur + data-list-image === active.image
 //     data-list-title === active.title
 
