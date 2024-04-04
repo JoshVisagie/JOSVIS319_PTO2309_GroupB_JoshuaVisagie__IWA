@@ -4,8 +4,8 @@ import { authors, books, genres, BOOKS_PER_PAGE } from "./data.js";
 /**
  * global variables
  */
+const FRAGMENT = document.createDocumentFragment();
 let numOfBooksOnPage = BOOKS_PER_PAGE;
-const fragment = document.createDocumentFragment();
 /**an array that will show all the books to display taking the filters into account */
 let booksToDisplay = [];
 /**an array that will will be all of the books currently being displayed on screen*/
@@ -19,7 +19,7 @@ let authorFilter = null;
  * this is a list of Colors for CSS. They will be accessed when we change the
  * color mode of the website
  */
-const cssColors = {
+const CSS_COLORS = {
   day: {
     dark: "10, 10, 20",
     light: "255, 255, 255",
@@ -189,9 +189,9 @@ const addFragment = (booksToRender) => {
   let { items } = HTML.list;
 
   for (const book of booksToRender) {
-    fragment.append(createPreview(book));
+    FRAGMENT.append(createPreview(book));
   }
-  items.appendChild(fragment);
+  items.appendChild(FRAGMENT);
 };
 
 /**
@@ -326,11 +326,11 @@ const updateThemeColor = (event) => {
 const setThemeColorProperties = (targetColorMode) => {
   document.documentElement.style.setProperty(
     "--color-dark",
-    cssColors[targetColorMode].dark
+    CSS_COLORS[targetColorMode].dark
   );
   document.documentElement.style.setProperty(
     "--color-light",
-    cssColors[targetColorMode].light
+    CSS_COLORS[targetColorMode].light
   );
 };
 /**
