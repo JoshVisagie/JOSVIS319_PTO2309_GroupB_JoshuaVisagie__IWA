@@ -19,7 +19,7 @@ let authorFilter = null;
  * a list of query selectors from index.html
  */
 const HTML = {
-  /** */
+  
   header: {
     search: document.querySelector("[data-header-search]"),
     settings: document.querySelector("[data-header-settings]"),
@@ -134,13 +134,10 @@ const createPreview = (book) => {
   element.className = "preview";
   element.innerHTML = `
         <img src= ${image} class ="preview__image"alt="${title}'s bookcover">
-                  <div class="list__items">
-                    
-                    <div class='preview__title'>${title}</div>
-                    <div class="preview__author">${refAuthor}</div> 
-                    
-                    </div>
-                    
+        <div class="list__items">       
+          <div class='preview__title'>${title}</div>
+          <div class="preview__author">${refAuthor}</div> 
+        </div>                    
         `;
   return element;
 };
@@ -157,10 +154,10 @@ const SelectPopulator = (element, object) => {
   anyOption.text = `Any`;
   element.appendChild(anyOption);
 
-  for (const item in object) {
-    const name = object[item];
+  for (const key in object) {
+    const name = object[key];
     const option = document.createElement("option");
-    option.value = item;
+    option.value = key;
     option.textContent = name;
     element.appendChild(option);
   }
@@ -188,7 +185,7 @@ addFragment(extracted);
 /**
  *  This event toggles the search overlay when the search or cancel buttons
  */
-const searchOverlay = (event) => {
+const searchOverlay = () => {
   let{overlay, title }=HTML.search
 
   if (!overlay.open === true) {
@@ -212,7 +209,7 @@ const searchOverlay = (event) => {
 const filterSearch = (event) => {
   let {title, genre, author, overlay} = HTML.search
   let {message} = HTML.list
-
+//destructer
   event.preventDefault();
   HTML.list.items.innerHTML = "";
 
@@ -237,22 +234,28 @@ const filterSearch = (event) => {
 
 
 const selectedBookToggle = (event)=>{
-  let { overlay, preview , title, subtitle, description } = HTML.activeList;
+  let { overlay, preview , title, subtitle, description, content } = HTML.activeList;
   
   const selectedBookElement = event.target.closest(".preview")
     if (selectedBookElement) {
         const bookId = selectedBookElement.dataset.id
         const selectedBook = books.find(book => book.id === bookId);
     if(selectedBook){
-      title.textContent =`${ selectedBook.title} (${selectedBook.published.slice(0,4)})`
-      preview.src = selectedBook.image
-      subtitle.textContent = authors[selectedBook.author]
-      description.textContent = selectedBook.description
-      overlay.open = true;
+        title.textContent =`${ selectedBook.title} (${selectedBook.published.slice(0,4)})`
+        //add date function
+        subtitle.textContent = authors[selectedBook.author]
+        description.textContent = selectedBook.description
+        description.style ="overflow-y:scroll"
+        preview.src = selectedBook.image
+
+        overlay.open = true;
+      
+       const imageElement = selectedBookElement.querySelector("img").cloneNode(true);
+         
+        overlay.insertBefore(imageElement, preview.parentElement)
+        imageElement.classList.add('overlay__image')
+        imageElement.classList.remove('preview__image')
     }
-     
-    
-    console.log(selectedBook)
   }
 }
 /**
@@ -270,7 +273,6 @@ const closeSelectedBook = (event) =>{
  */
 const settingsOverlay =(event)=>{
   let{overlay, theme  }=HTML.settings
- 
   if (!overlay.open === true) {
     overlay.open = true;
     theme.focus();
@@ -279,6 +281,8 @@ const settingsOverlay =(event)=>{
   }
 };
 
+HTML.settings.theme.value = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'night' : 'day'
+
 /**
  * this functions changes the look color mode of the website when the submit
  * form is submitted
@@ -286,9 +290,18 @@ const settingsOverlay =(event)=>{
  */
 const changeSettings =(event)=>{
   event.preventDefault();
-  console.log('change settings')
-}
 
+  let{theme, overlay} = HTML.settings
+  const colorMode = theme.value
+  
+  document.documentElement.style.setProperty('--color-dark', cssColors[colorMode].dark)
+  document.documentElement.style.setProperty('--color-light', cssColors[colorMode].light)
+  overlay.open = false;
+}
+/**
+ * this is a list of Colors for CSS. They will be accessed when we change the 
+ * color mode of the website
+ */
 const cssColors = {
   day: {
     dark: "10, 10, 20",
@@ -315,41 +328,11 @@ HTML.settings.cancelButton.addEventListener('click', settingsOverlay)
 
 
 
-//     return element
-// }
-/* matches = books
-page = 1;
-(!books && !Array.isArray(books)) throw new Error('Source required') 
-if (!range && range.length < 2) throw new Error('Range must be an array with two numbers')
 
- */
+//if(!books && !Array.isArray(books)) throw new Error('Source required') 
+//if(!range && range.length < 2) throw new Error('Range must be an array with two numbers')
 
-// data-settings-theme.value === window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'night' : 'day'
+
+
+ 
 // v = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches? 'night' | 'day'
-
-// documentElement.style.setProperty('--color-dark', css[v].dark);
-// documentElement.style.setProperty('--color-light', css[v].light);
-
-//     window.scrollTo({ top: 0, behavior: 'smooth' });
-//     data-search-overlay.open = false
-// }
-
-// data-settings-overlay.submit; {
-//     preventDefault()
-//     const formData = new FormData(event.target)
-//     const result = Object.fromEntries(formData)
-//     document.documentElement.style.setProperty('--color-dark', css[result.theme].dark);
-//     document.documentElement.style.setProperty('--color-light', css[result.theme].light);
-//     data-settings-overlay).open === false
-// }
-
-//     data-list-blur + data-list-image === active.image
-//     data-list-title === active.title
-
-//     data-list-subtitle === '${authors[active.author]} (${Date(active.published).year})'
-//     data-list-description === active.description
-// }
-
-/**
- * Event listeners
- */
