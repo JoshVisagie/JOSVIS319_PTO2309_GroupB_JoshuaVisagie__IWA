@@ -9,7 +9,7 @@ const fragment = document.createDocumentFragment();
 /**an array that will show all the books to display taking the filters into account */
 let booksToDisplay = [];
 /**an array that will will be all of the books currently being displayed on screen*/
-let extracted=[];
+let extracted = [];
 /**filter variables*/
 let titleFilter = null;
 let genreFilter = null;
@@ -19,7 +19,6 @@ let authorFilter = null;
  * a list of query selectors from index.html
  */
 const HTML = {
-  
   header: {
     search: document.querySelector("[data-header-search]"),
     settings: document.querySelector("[data-header-settings]"),
@@ -49,11 +48,11 @@ const HTML = {
   },
 
   settings: {
-    overlay : document.querySelector("[data-settings-overlay]"),
-    theme : document.querySelector("[data-settings-theme]"),
+    overlay: document.querySelector("[data-settings-overlay]"),
+    theme: document.querySelector("[data-settings-theme]"),
     cancelButton: document.querySelector("[data-settings-cancel]"),
-    submitButton : document.querySelector(".overlay__button_primary")
-  }
+    submitButton: document.querySelector(".overlay__button_primary"),
+  },
 };
 
 /**
@@ -62,7 +61,7 @@ const HTML = {
  */
 const toDisplay = () => {
   booksToDisplay = [];
-    
+
   for (const singleBook of books) {
     const hasMatchingGenre = singleBook.genres.some(
       (genre) => genre === genreFilter
@@ -71,24 +70,21 @@ const toDisplay = () => {
     if (
       (genreFilter === null || hasMatchingGenre) &&
       (titleFilter === null ||
-        singleBook.title.toLowerCase().includes(titleFilter.toLowerCase().trim())) &&
+        singleBook.title
+          .toLowerCase()
+          .includes(titleFilter.toLowerCase().trim())) &&
       (authorFilter === null || singleBook.author === authorFilter)
     ) {
       booksToDisplay.push(singleBook);
     }
   }
-
-  
 };
-
-toDisplay();
-extracted = booksToDisplay.slice(0, booksPerPage);
 
 /**
  * a function to update the 'Show More:' button
  */
 const buttonUpdate = () => {
-  let{button}=HTML.list
+  let { button } = HTML.list;
 
   let buttonValue = booksToDisplay.length - booksPerPage;
   button.className = "list__button";
@@ -100,13 +96,11 @@ const buttonUpdate = () => {
     button.disabled = false;
   }
 
-    button.innerHTML = `
+  button.innerHTML = `
         <span>Show More:</span>
       <span class="list__remaining">(${buttonValue})</span>
       `;
 };
-
-buttonUpdate();
 
 /**
  * this function increases the books per page by 36
@@ -163,16 +157,12 @@ const SelectPopulator = (element, object) => {
   }
 };
 
-SelectPopulator(HTML.search.genre, genres);
-SelectPopulator(HTML.search.author, authors);
-
 /**
  * this loop goes through all of the books that have been extracted and  uses
  * the factory function create preview to  in the items div
  */
 const addFragment = (extract) => {
-  
-  let {items}=HTML.list
+  let { items } = HTML.list;
 
   for (const book of extract) {
     fragment.append(createPreview(book));
@@ -180,13 +170,11 @@ const addFragment = (extract) => {
   items.appendChild(fragment);
 };
 
-addFragment(extracted);
-
 /**
  *  This event toggles the search overlay when the search or cancel buttons
  */
 const searchOverlay = () => {
-  let{overlay, title }=HTML.search
+  let { overlay, title } = HTML.search;
 
   if (!overlay.open === true) {
     overlay.open = true;
@@ -207,11 +195,10 @@ const searchOverlay = () => {
  * @param {event} event
  */
 const filterSearch = (event) => {
-  let {title, genre, author, overlay} = HTML.search
-  let {message} = HTML.list
-//destructer
+  let { title, genre, author, overlay } = HTML.search;
+  let { message, items } = HTML.list;
   event.preventDefault();
-  HTML.list.items.innerHTML = "";
+  items.innerHTML = "";
 
   titleFilter = title.value;
   genreFilter = genre.value;
@@ -232,47 +219,51 @@ const filterSearch = (event) => {
   }
 };
 
+const selectedBookToggle = (event) => {
+  let { overlay, preview, title, subtitle, description, content } =
+    HTML.activeList;
 
-const selectedBookToggle = (event)=>{
-  let { overlay, preview , title, subtitle, description, content } = HTML.activeList;
-  
-  const selectedBookElement = event.target.closest(".preview")
-    if (selectedBookElement) {
-        const bookId = selectedBookElement.dataset.id
-        const selectedBook = books.find(book => book.id === bookId);
-    if(selectedBook){
-        title.textContent =`${ selectedBook.title} (${selectedBook.published.slice(0,4)})`
-        //add date function
-        subtitle.textContent = authors[selectedBook.author]
-        description.textContent = selectedBook.description
-        description.style ="overflow-y:scroll"
-        preview.src = selectedBook.image
+  const selectedBookElement = event.target.closest(".preview");
+  if (selectedBookElement) {
+    const bookId = selectedBookElement.dataset.id;
+    const selectedBook = books.find((book) => book.id === bookId);
+    if (selectedBook) {
+      title.textContent = `${
+        selectedBook.title
+      } (${selectedBook.published.slice(0, 4)})`;
+      //add date function
+      subtitle.textContent = authors[selectedBook.author];
+      description.textContent = selectedBook.description;
+      description.style = "overflow-y:scroll";
+      preview.src = selectedBook.image;
 
-        overlay.open = true;
-      
-       const imageElement = selectedBookElement.querySelector("img").cloneNode(true);
-         
-        overlay.insertBefore(imageElement, preview.parentElement)
-        imageElement.classList.add('overlay__image')
-        imageElement.classList.remove('preview__image')
+      overlay.open = true;
+
+      const imageElement = selectedBookElement
+        .querySelector("img")
+        .cloneNode(true);
+
+      overlay.insertBefore(imageElement, preview.parentElement);
+      imageElement.classList.add("overlay__image");
+      imageElement.classList.remove("preview__image");
     }
   }
-}
+};
 /**
  * this closes the overlay of book you have selected
- * @param {event} event 
+ * @param {event} event
  */
-const closeSelectedBook = (event) =>{
-  let {overlay} = HTML.activeList;
-  overlay.open=false;
-}
+const closeSelectedBook = (event) => {
+  let { overlay } = HTML.activeList;
+  overlay.open = false;
+};
 /**
  * this toggles the settings overlay open and closed when pushing the settings
  * button on the header or the cancel button on the form
- * @param {event} event 
+ * @param {event} event
  */
-const settingsOverlay =(event)=>{
-  let{overlay, theme  }=HTML.settings
+const settingsOverlay = (event) => {
+  let { overlay, theme } = HTML.settings;
   if (!overlay.open === true) {
     overlay.open = true;
     theme.focus();
@@ -281,25 +272,29 @@ const settingsOverlay =(event)=>{
   }
 };
 
-HTML.settings.theme.value = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'night' : 'day'
-
 /**
  * this functions changes the look color mode of the website when the submit
  * form is submitted
- * @param {event} event 
+ * @param {event} event
  */
-const changeSettings =(event)=>{
+const changeSettings = (event) => {
   event.preventDefault();
 
-  let{theme, overlay} = HTML.settings
-  const colorMode = theme.value
-  
-  document.documentElement.style.setProperty('--color-dark', cssColors[colorMode].dark)
-  document.documentElement.style.setProperty('--color-light', cssColors[colorMode].light)
+  let { theme, overlay } = HTML.settings;
+  const colorMode = theme.value;
+
+  document.documentElement.style.setProperty(
+    "--color-dark",
+    cssColors[colorMode].dark
+  );
+  document.documentElement.style.setProperty(
+    "--color-light",
+    cssColors[colorMode].light
+  );
   overlay.open = false;
-}
+};
 /**
- * this is a list of Colors for CSS. They will be accessed when we change the 
+ * this is a list of Colors for CSS. They will be accessed when we change the
  * color mode of the website
  */
 const cssColors = {
@@ -318,21 +313,29 @@ HTML.list.button.addEventListener("click", previewMore);
 HTML.header.search.addEventListener("click", searchOverlay);
 HTML.search.overlay.addEventListener("submit", filterSearch);
 HTML.search.cancelButton.addEventListener("click", searchOverlay);
-HTML.list.items.addEventListener('click', selectedBookToggle)
-HTML.activeList.button.addEventListener('click', closeSelectedBook)
+HTML.list.items.addEventListener("click", selectedBookToggle);
+HTML.activeList.button.addEventListener("click", closeSelectedBook);
 HTML.settings.overlay.addEventListener("submit", changeSettings);
-HTML.header.settings.addEventListener('click', settingsOverlay)
-HTML.settings.cancelButton.addEventListener('click', settingsOverlay)
+HTML.header.settings.addEventListener("click", settingsOverlay);
+HTML.settings.cancelButton.addEventListener("click", settingsOverlay);
+
+/**
+ * functions called
+ */
+toDisplay();
+extracted = booksToDisplay.slice(0, booksPerPage);
+buttonUpdate();
+SelectPopulator(HTML.search.genre, genres);
+SelectPopulator(HTML.search.author, authors);
+addFragment(extracted);
+
+HTML.settings.theme.value =
+  window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches
+    ? "night"
+    : "day";
 
 
-
-
-
-
-//if(!books && !Array.isArray(books)) throw new Error('Source required') 
+//if(!books && !Array.isArray(books)) throw new Error('Source required')
 //if(!range && range.length < 2) throw new Error('Range must be an array with two numbers')
 
-
-
- 
 // v = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches? 'night' | 'day'
