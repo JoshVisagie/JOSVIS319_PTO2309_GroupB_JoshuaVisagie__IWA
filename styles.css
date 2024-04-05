@@ -393,7 +393,8 @@ option {
   -webkit-line-clamp: 6;
   -webkit-box-orient: vertical;  
   overflow: hidden;
-  color: rgba(var(--color-dark), 0.8)
+  color: rgba(var(--color-dark), 0.8);
+  overflow-y:scroll;
 }
 
 .overlay__data_secondary {

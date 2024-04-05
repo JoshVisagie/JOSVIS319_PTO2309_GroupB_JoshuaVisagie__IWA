@@ -46,6 +46,7 @@ const HTML = {
   },
 
   activeList: {
+    bookCover: document.querySelector("[data-list-image]"),
     overlay: document.querySelector("[data-list-active]"),
     preview: document.querySelector("[data-list-blur]"),
     content: document.querySelector(".overlay_content"),
@@ -141,7 +142,7 @@ const handleLoadMore = () => {
  * this takes an object called book and creates element with the html for a single
  * book.
  * @param {object} book
- * @returns element
+ * @returns {HTMLDivElement} newElement
  */
 const createPreview = (book) => {
   const { title, image, author: authorID, id } = book;
@@ -184,6 +185,7 @@ const populateSelect = (element, object) => {
 /**
  * this loop goes through all of the books that have been extracted and  uses
  * the factory function create preview to  in the items div
+ * @param {array} booksToRender
  */
 const addFragment = (booksToRender) => {
   let { items } = HTML.list;
@@ -252,6 +254,7 @@ const toggleSelectedBook = (event) => {
     title,
     subtitle,
     description,
+    bookCover,
   } = HTML.activeList;
 
   const selectedBookElement = event.target.closest(".preview");
@@ -267,19 +270,10 @@ const toggleSelectedBook = (event) => {
       //TODO:add date function
       subtitle.textContent = authors[selectedBook.author];
       description.textContent = selectedBook.description;
-      //TODO:Add styling to CSS
-      description.style = "overflow-y:scroll";
       bookPreview.src = selectedBook.image;
-
+      bookCover.src = selectedBook.image;
+      console.log(bookCover);
       overlay.open = true;
-
-      const imageElement = selectedBookElement
-        .querySelector("img")
-        .cloneNode(true);
-
-      overlay.insertBefore(imageElement, bookPreview.parentElement);
-      imageElement.classList.add("overlay__image");
-      imageElement.classList.remove("preview__image");
     }
   }
 };
