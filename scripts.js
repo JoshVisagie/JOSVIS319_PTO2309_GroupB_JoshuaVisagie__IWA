@@ -6,10 +6,13 @@ import { authors, books, genres, BOOKS_PER_PAGE } from "./data.js";
  */
 const FRAGMENT = document.createDocumentFragment();
 let numOfBooksOnPage = BOOKS_PER_PAGE;
+
 /**an array that will show all the books to display taking the filters into account */
 let booksToDisplay = [];
+
 /**an array that will will be all of the books currently being displayed on screen*/
 let renderedBooks = [];
+
 /**filter variables*/
 let titleFilter = null;
 let genreFilter = null;
@@ -360,7 +363,3 @@ populateSelect(HTML.search.author, authors);
 addFragment(renderedBooks);
 setColorThemeSelector();
 
-//if(!books && !Array.isArray(books)) throw new Error('Source required')
-//if(!range && range.length < 2) throw new Error('Range must be an array with two numbers')
-
-// v = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches? 'night' | 'day'
