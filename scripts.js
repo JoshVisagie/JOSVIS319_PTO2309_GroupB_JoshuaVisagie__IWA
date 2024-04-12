@@ -249,7 +249,11 @@ const applySearchFilters = (event) => {
     message.classList.remove("list__message_show");
   }
 };
-
+/**
+ * This function toggles an overlay displaying a brief summary of the books
+ * preview that you have clicked on
+ * @param {event} event 
+ */
 const toggleSelectedBook = (event) => {
   let {
     overlay,
